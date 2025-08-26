@@ -25,39 +25,6 @@ type Chunk struct {
 	EndChunk    int64
 }
 
-func Download(link string, outputFile string) Stats {
-	startTime := time.Now()
-	out, err := os.Create(outputFile)
-	if err != nil {
-		fmt.Printf("Unable to create output file: %s\n", err)
-		os.Exit(1)
-	}
-	defer out.Close()
-	resp, err := http.Get(link)
-	if err != nil {
-		fmt.Printf("Error making get request: %s\n", err)
-		os.Exit(1)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		fmt.Print("Bad response : $s\n", resp.StatusCode)
-		os.Exit(1)
-	}
-	size, err := io.Copy(out, resp.Body)
-	if err != nil {
-		fmt.Printf("Error writing to file: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Printf("Downloaded %d bytes to %s\n", size, outputFile)
-	endTime := time.Now()
-	elapsedTime := endTime.Sub(startTime)
-	stats := Stats{
-		Size:      size,
-		Timetaken: elapsedTime,
-	}
-	return stats
-}
-
 func GetLength(link string) int64 {
 	resp, err := http.Head(link)
 	if err != nil {
@@ -86,7 +53,8 @@ func GetHead(link string) int64 {
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusPartialContent {
+	switch resp.StatusCode {
+	case http.StatusPartialContent:
 		contentRange := resp.Header.Get("Content-Range")
 		if contentRange == "" {
 			fmt.Println("Content-Range header missing.")
@@ -104,7 +72,7 @@ func GetHead(link string) int64 {
 			return 0
 		}
 		return totalSize
-	} else if resp.StatusCode == http.StatusOK {
+	case http.StatusOK:
 		return resp.ContentLength
 	}
 	fmt.Printf("Unexpected status code: %d\n", resp.StatusCode)
