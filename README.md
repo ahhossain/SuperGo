@@ -22,7 +22,8 @@ This will either max out your storage or your network :satisfied:
 ## Installation
 You can get started with the SuperGo downloader using a few simple methods.
 
-From a Release Binary
+From a Release Binary https://github.com/ahhossain/SuperGo/releases
+
 Grab the latest pre-compiled binary from the Releases page. This is the fastest way to get started.
 
 From Source (using Go)
